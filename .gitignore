@@ -109,6 +109,14 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 .flattened-pom.xml
 
+# Local Maven repo / bundled toolchain (build tooling, must not be committed)
+.m2/
+.m2repo_build/
+apache-maven/
+
+# Ad-hoc analysis output
+analysis_report.md
+
 # Common working directory
 run/
 /obfuscation/node_modules/
@@ -117,3 +125,6 @@ run/
 /.vscode/
 */package-lock.json
 /dependency-reduced-pom.xml
+
+# Claude Code agent config (do not publish)
+.claude/

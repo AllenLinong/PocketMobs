@@ -1,15 +1,35 @@
 name: PocketMobs
-version: 1.1.0
+version: 2.0.0
 main: dev.lone.pocketmobs.Main
-api-version: 1.13
-authors: [LoneDev]
-depend:
-  - LoneLibs
+api-version: 1.21
+folia-supported: true
+description: A plugin that allows players to catch and store mobs in special balls
+authors: [LoneDev,HuiDu_OwO]
 softdepend:
   - Vault
   - Essentials
-  - ProtocolLib
 commands:
   pocketmob:
-    usage: /<command> [args]
+    description: Main command for PocketMobs plugin
+    usage: /<command> [get|give|reload|recipes|debug] [args]
     aliases: [pocketmobs, pmob, pmobs]
+permissions:
+  # Admin subcommands — op-only by default.
+  pocketmob.admin.get:
+    description: Allows using /pocketmob get
+    default: op
+  pocketmob.admin.give:
+    description: Allows using /pocketmob give
+    default: op
+  pocketmob.admin.reload:
+    description: Allows using /pocketmob reload
+    default: op
+  pocketmob.admin.debug:
+    description: Allows using /pocketmob debug
+    default: op
+  # User features — granted to everyone by default.
+  pocketmob.user.recipes:
+    description: Allows viewing and buying ball recipes via /pocketmob recipes
+    default: true
+  # Per-ball nodes pocketmob.user.craft.<ball> and pocketmob.user.buy.<ball> are
+  # registered at runtime (default true) because ball names come from balls.yml.

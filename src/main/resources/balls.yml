@@ -1,9 +1,12 @@
 balls:
   example_ball:
     enabled: false
-    display-name: "This is just an example Ball, you can see every attribute you can set here.
-    Don't worry it's disabled, you can't get it ingame"
-    head-texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGRlYjQ3ZDQ3YzI4YTZhNDNmYzViOGQwZmE0NmIyZGVmYmFjOWNiZDVhYjM0NDgwMzI1YTI0NTliZTExMGY0In19fQ=="
+    display-name: |-
+      This is just an example Ball, you can see every attribute you can set here.
+      Don't worry it's disabled, you can't get it ingame
+    item-material: PLAYER_HEAD
+    custom-model-data: -1
+    head-texture: "https://textures.minecraft.net/texture/8deb47d47c28a6a43fc5b8d0fa46b2defbac9cbd5ab34480325a2459be110f4"
     max-usages: 4
     unlimited-usages: false
     catch-success: 65.3
@@ -17,15 +20,16 @@ balls:
     effects:
       catch:
         particle:
-          name: SPELL_MOB
+          name: ENTITY_EFFECT
           amount: 50
+          color: "#00FF00"
         sound:
-          name: BLOCK_METAL_PLACE
+          name: BLOCK_ANVIL_PLACE
           volume: 1
           pitch: 2
       free:
         particle:
-          name: EXPLOSION_LARGE
+          name: EXPLOSION
           amount: 1
         sound:
           name: ENTITY_CHICKEN_EGG
@@ -41,7 +45,7 @@ balls:
           pitch: 2
       not_spawned:
         particle:
-          name: BARRIER
+          name: SMOKE
           amount: 1
         sound:
           name: ENTITY_ARMOR_STAND_HIT
@@ -62,7 +66,7 @@ balls:
         E: ENDER_CHEST
   farm_ball:
     display-name: "Farm Ball"
-    head-texture: "eyJ0aW1lc3RhbXAiOjE1ODU5NDkxNDIzOTAsInByb2ZpbGVJZCI6ImQ2MGYzNDczNmExMjQ3YTI5YjgyY2M3MTViMDA0OGRiIiwicHJvZmlsZU5hbWUiOiJCSl9EYW5pZWwiLCJzaWduYXR1cmVSZXF1aXJlZCI6dHJ1ZSwidGV4dHVyZXMiOnsiU0tJTiI6eyJ1cmwiOiJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzEwZjA5ZjRiN2M0ZjgyOGRiNmVkOWQwODI3ZTcyMzI3OTZhZTE2NzVlMDJkODNmOTYyZGM0NTU3ZTE2MTU5YzYifX19"
+    head-texture: "https://textures.minecraft.net/texture/10f09f4b7c4f828db6ed9d0827e7232796ae1675e02d83f962dc4557e16159c6"
     max-usages: 4
     catch-success: 60.0
     catchable-entities:
@@ -71,20 +75,28 @@ balls:
       - PIG
       - RABBIT
       - SHEEP
-      - RABBIT
+    craft-recipe:
+      enabled: true
+      pattern:
+        - XWX
+        - WEW
+        - XWX
+      ingredients:
+        W: WHEAT
+        E: EGG
   nether_ball:
     display-name: "Nether Ball"
-    head-texture: "eyJ0aW1lc3RhbXAiOjE1ODU5OTMzODk0MzAsInByb2ZpbGVJZCI6ImQ2MGYzNDczNmExMjQ3YTI5YjgyY2M3MTViMDA0OGRiIiwicHJvZmlsZU5hbWUiOiJCSl9EYW5pZWwiLCJzaWduYXR1cmVSZXF1aXJlZCI6dHJ1ZSwidGV4dHVyZXMiOnsiU0tJTiI6eyJ1cmwiOiJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzYxZGE2ZDYyMDBmZWVkMmI1ZmFhM2MyODMxYThmNDFlMDhiNzg0ZWU1MDExZjdiZmEyN2ViZDViYmU2YTcxZjcifX19"
+    head-texture: "https://textures.minecraft.net/texture/61da6d6200feed2b5faa3c2831a8f41e08b784ee5011f7bfa27ebd5bbe6a71f7"
     max-usages: 4
     catch-success: 50.0
     catchable-entities:
       - BLAZE
       - MAGMA_CUBE
       - WITHER_SKELETON
-      - PIG_ZOMBIE
+      - ZOMBIFIED_PIGLIN
   end_ball:
     display-name: "End Ball"
-    head-texture: "eyJ0aW1lc3RhbXAiOjE1ODY0MjI5NzAwMTYsInByb2ZpbGVJZCI6IjU3MGIwNWJhMjZmMzRhOGViZmRiODBlY2JjZDdlNjIwIiwicHJvZmlsZU5hbWUiOiJMb3JkU29ubnkiLCJzaWduYXR1cmVSZXF1aXJlZCI6dHJ1ZSwidGV4dHVyZXMiOnsiU0tJTiI6eyJ1cmwiOiJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzNmN2I5YTZmMDZiNWU0YjEyYjZhYmMyMTRlOWEzMTJjMDc5Nzg5NmYyZjM0NTJkM2JmMGZjNzJmOWZiMDUzYSJ9fX0="
+    head-texture: "https://textures.minecraft.net/texture/3f7b9a6f06b5e4b12b6abc214e9a312c0797896f2f3452d3bf0fc72f9fb053a"
     max-usages: 3
     catch-success: 60.0
     catchable-entities:
@@ -93,7 +105,7 @@ balls:
       - SHULKER
   monster_ball:
     display-name: "Monster Ball"
-    head-texture: "eyJ0aW1lc3RhbXAiOjE1ODY0MjU1MjQwOTEsInByb2ZpbGVJZCI6IjNmYzdmZGY5Mzk2MzRjNDE5MTE5OWJhM2Y3Y2MzZmVkIiwicHJvZmlsZU5hbWUiOiJZZWxlaGEiLCJzaWduYXR1cmVSZXF1aXJlZCI6dHJ1ZSwidGV4dHVyZXMiOnsiU0tJTiI6eyJ1cmwiOiJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzY3NzUyYWVhMGJmMzQ4ZDVmNWEyMWRkZDc0MzI0MGQ5MjJiMmVjODYxNzlmZDBmNDFmNDM3M2Y1ZmY0ZmUwZWYifX19"
+    head-texture: "https://textures.minecraft.net/texture/67752aea0bf348d5f5a21ddd743240d922b2ec86179fd0f41f4373f5fff4fe0ef"
     max-usages: 4
     catch-success: 50.0
     catchable-entities:
@@ -104,16 +116,19 @@ balls:
       - ZOMBIE
   villager_ball:
     display-name: "Villager Ball"
-    head-texture: "eyJ0aW1lc3RhbXAiOjE1ODY0MjM4MTQ0MzEsInByb2ZpbGVJZCI6ImMxYWYxODI5MDYwZTQ0OGRhNjYwOWRmZGM2OGEzOWE4IiwicHJvZmlsZU5hbWUiOiJCQVJLeDQiLCJzaWduYXR1cmVSZXF1aXJlZCI6dHJ1ZSwidGV4dHVyZXMiOnsiU0tJTiI6eyJ1cmwiOiJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2Y1ZTNjMzNlNDMyZTFjMWUwNDkwNDMxNTg2ZDExMWM3ZWI4N2E1M2QzN2UwZjkxZDAyMTA0YzFiOTU2ZGQ2YzEifX19"
+    head-texture: "https://textures.minecraft.net/texture/f5e3c33e432e1c1e0490431586d111c7eb87a53d37e0f91d02104c1b956dd6c1"
     max-usages: 5
     catch-success: 45.0
     catchable-entities:
       - VILLAGER
       - ZOMBIE_VILLAGER
       - WANDERING_TRADER
+      - IRON_GOLEM
+      - SNOW_GOLEM
+      - ALLAY
   friend_ball:
     display-name: "Friend Ball"
-    head-texture: "eyJ0aW1lc3RhbXAiOjE1ODY0MjU2ODI5MzEsInByb2ZpbGVJZCI6IjU2Njc1YjIyMzJmMDRlZTA4OTE3OWU5YzkyMDZjZmU4IiwicHJvZmlsZU5hbWUiOiJUaGVJbmRyYSIsInNpZ25hdHVyZVJlcXVpcmVkIjp0cnVlLCJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTAzZjRjMTY3NjA0NWE2NGM1NzA5ZmJlZjk3NTA1OTc3OTczNjJjNmU0NzFhOTcxNmQ3ODI2MDFkY2U2ZmNiOSJ9fX0="
+    head-texture: "https://textures.minecraft.net/texture/e03f4c1676045a64c5709fbef9750597797362c6e471a9716d782601dce6fcb9"
     max-usages: 5
     catch-success: 45.0
     catchable-entities:
@@ -123,7 +138,7 @@ balls:
       - WOLF
   horse_ball:
     display-name: "Horse Ball"
-    head-texture: "eyJ0aW1lc3RhbXAiOjE1ODY0MjU5Nzk4MjcsInByb2ZpbGVJZCI6IjE5MjUyMWI0ZWZkYjQyNWM4OTMxZjAyYTg0OTZlMTFiIiwicHJvZmlsZU5hbWUiOiJTZXJpYWxpemFibGUiLCJzaWduYXR1cmVSZXF1aXJlZCI6dHJ1ZSwidGV4dHVyZXMiOnsiU0tJTiI6eyJ1cmwiOiJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzdmZmNkOTA1YTVhOWQyZTcwNDYwNTk5ZWM5ODI2OWQxYzcxMzFmYWIxM2EzMmRiNTNhYjk2NDM2MTBmYTVlM2IifX19"
+    head-texture: "https://textures.minecraft.net/texture/7ffcd905a5a9d2e70460599ec98269d1c7131fab13a32db53ab9643610fa5e3b"
     max-usages: 5
     catch-success: 45.0
     catchable-entities:
@@ -134,17 +149,17 @@ balls:
       - ZOMBIE_HORSE
   water_ball:
     display-name: "Water Ball"
-    head-texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzM1M2VjM2ZlMDU2ODFiOTZmOTcxYWM2NmZhMTMzN2UwNGIyYjFhYmM1YWI1NGU1OGUxNjE3MmUyMzk0In19fQ=="
+    head-texture: "https://textures.minecraft.net/texture/c353ec3fe05681b96f971ac66fa1337e04b2b1abc5ab54e58e16172e2394"
     max-usages: 5
     catch-success: 70.0
     effects:
       catch:
         particle:
-          name: WATER_SPLASH
+          name: SPLASH
           amount: 100
       free:
         particle:
-          name: WATER_SPLASH
+          name: SPLASH
           amount: 80
     catchable-entities:
       - COD
@@ -155,7 +170,7 @@ balls:
       - DOLPHIN
   ultra_ball:
     display-name: "Ultra Ball"
-    head-texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTFmMWVhY2JiZTM3NjU1N2Y1ZDdkM2VjZTU5NGRiMTMzOGY2NjYzNjYyOTgyY2ZjNjU4YzdhN2RjNjM5ZDc3In19fQ=="
+    head-texture: "https://textures.minecraft.net/texture/51f1eacbbe376557f5d7d3ece594db1338f6663662982cfc658c7a7dc639d77"
     max-usages: 5
     catch-success: 70.0
     catchable-entities:
@@ -163,7 +178,7 @@ balls:
       - ALL_WATER_MOBS
   master_ball:
     display-name: "Master Ball"
-    head-texture: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTU2ZDJhMWNkZGE4Nzc4ZmZkODMzYzdhNWY1MzliODdmOTllYjgzYTVkMTk1OTllNWZhOGU2Yzk2NmMzN2MyIn19fQ=="
+    head-texture: "https://textures.minecraft.net/texture/556d2a1cdda8778ffd833c7a5f539b87f99eb83a5d19599e5fa8e6c966c37c2"
     max-usages: 4
     catch-success: 70.0
     buy:

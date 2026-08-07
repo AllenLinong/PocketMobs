@@ -1,68 +1,51 @@
 package dev.lone.pocketmobs.commands;
 
+import dev.lone.pocketmobs.Constants;
 import dev.lone.pocketmobs.Settings;
-import dev.lone.pocketmobs.Utils;
-import dev.lone.pocketmobs.Main;
-import dev.lone.pocketmobs.utils.InvUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class GiveCmd
 {
     public boolean handle(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args)
     {
-        if (sender.hasPermission("pocketmob.admin.give"))
+        if (!sender.hasPermission(Constants.Permissions.ADMIN_GIVE))
         {
-            if (args.length > 2)
-            {
-                if (!Main.inst.ballsManager.exists(args[2]))
-                {
-                    sender.sendMessage(Settings.lang.getColored("item-not-found").replace("{item}", args[1]));
-                    return true;
-                }
-
-                ItemStack item = Main.inst.ballsManager.getOriginalItemStack(args[2]).clone();
-
-
-                int amount = 1;
-                if (args.length == 4)
-                    amount = Utils.parseInt(args[3], 1);
-
-                Player playerToGive = Bukkit.getPlayer(args[1]);
-                if (playerToGive == null)
-                {
-                    sender.sendMessage(Settings.lang.getColored("offline-player"));
-                    return true;
-                }
-
-                sender.sendMessage(Settings.lang.getColored("given-item")
-                        .replace("{item}", args[1])
-                        .replace("{player}", playerToGive.getDisplayName())
-                );
-
-                for (int i = 0; i < amount; i++)
-                {
-                    item = Main.inst.ballsManager.getOriginalItemStack(args[2]).clone();
-                    InvUtil.giveItem(playerToGive, item);
-                }
-                playerToGive.sendMessage(Settings.lang.getColored("obtained") + item.getItemMeta().getDisplayName());
-            }
-            else
-            {
-
-                sender.sendMessage(Settings.lang.getColored("wrong-command-usage") + ChatColor.AQUA + "/pocketmob give <player> <ball>");
-                return true;
-            }
+            sender.sendMessage(Settings.lang.getColored("no-permission") + ChatColor.WHITE + Constants.Permissions.ADMIN_GIVE);
+            return true;
         }
-        else
+
+        if (args.length <= 2)
         {
-            sender.sendMessage(Settings.lang.getColored("no-permission") + ChatColor.WHITE + "pocketmob.admin.give");
+            sender.sendMessage(Settings.lang.getColored("wrong-command-usage") + ChatColor.AQUA + "/pocketmob give <player> <ball>");
+            return true;
         }
+
+        if (!CommandUtils.validateBallName(sender, args[2]))
+            return true;
+
+        int amount = args.length == 4 ? CommandUtils.parseAmount(sender, args[3]) : 1;
+
+        Player playerToGive = Bukkit.getPlayer(args[1]);
+        if (playerToGive == null)
+        {
+            sender.sendMessage(Settings.lang.getColored("offline-player"));
+            return true;
+        }
+
+        String itemName = CommandUtils.giveBalls(playerToGive, args[2], amount);
+
+        sender.sendMessage(Settings.lang.getColored("given-item")
+                .replace("{item}", itemName)
+                .replace("{player}", playerToGive.getName()));
+
+        playerToGive.sendMessage(Settings.lang.getColored("obtained")
+                .replace("{amount}", String.valueOf(amount))
+                .replace("{item}", itemName));
         return true;
     }
 }
