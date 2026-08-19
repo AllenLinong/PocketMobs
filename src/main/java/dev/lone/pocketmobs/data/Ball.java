@@ -287,6 +287,16 @@ public class Ball
         return pdc.has(key("PBMobData"), PersistentDataType.TAG_CONTAINER);
     }
 
+    public static EntityType getStoredMobType(ItemStack item)
+    {
+        PersistentDataContainer pdc = pdcOrNull(item);
+        if (pdc == null || !pdc.has(key("PBMobData"), PersistentDataType.TAG_CONTAINER))
+            return null;
+
+        CaughtMob caughtMob = CaughtMob.readFrom(pdc.get(key("PBMobData"), PersistentDataType.TAG_CONTAINER));
+        return caughtMob != null ? caughtMob.getType() : null;
+    }
+
 
     public static ItemStack catchMob(ItemStack ballItemStack, Entity mob)
     {
@@ -346,7 +356,7 @@ public class Ball
         }
 
         Entity spawned = caughtMob.spawnEntity(location);
-        if (spawned != null && (caughtMob.isDegradedPlaceholder() || spawned.getType() != caughtMob.getType()))
+        if (spawned != null)
         {
             clearAction.run();
         }
@@ -441,6 +451,7 @@ public class Ball
 
             try
             {
+                loreComponents.replaceAll(component -> component.decoration(TextDecoration.ITALIC, false));
                 ItemMeta meta = ballItemStack.getItemMeta();
                 meta.lore(loreComponents);
                 ballItemStack.setItemMeta(meta);
@@ -469,6 +480,7 @@ public class Ball
 
                 try
                 {
+                    loreComponents.replaceAll(component -> component.decoration(TextDecoration.ITALIC, false));
                     ItemMeta meta = ballItemStack.getItemMeta();
                     meta.lore(loreComponents);
                     ballItemStack.setItemMeta(meta);
@@ -518,6 +530,7 @@ public class Ball
 
             try
             {
+                loreComponents.replaceAll(component -> component.decoration(TextDecoration.ITALIC, false));
                 ItemMeta meta = ballItemStack.getItemMeta();
                 meta.lore(loreComponents);
                 ballItemStack.setItemMeta(meta);
@@ -566,7 +579,9 @@ public class Ball
             {
                 EntityType type = EntityType.valueOf(entityType);
                 catchableMobsStr.append(EntityUtil.getReadableEntityTypeName(type)).append(", ");
-                catchableMobComponents.add(Component.text(ChatColor.GRAY + "- ").append(LocaleUtils.getEntityTranslatable(type)));
+                catchableMobComponents.add(Component.text(ChatColor.GRAY + "- ")
+                        .append(LocaleUtils.getEntityTranslatable(type))
+                        .decoration(TextDecoration.ITALIC, false));
             }
             catch (IllegalArgumentException exc)
             {
@@ -574,23 +589,23 @@ public class Ball
                 {
                     case "ALL_ANIMALS":
                         catchableMobsStr.append(Settings.lang.getColored("all-animals")).append(", ");
-                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-animals")));
+                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-animals")).decoration(TextDecoration.ITALIC, false));
                         break;
                     case "ALL_MONSTERS":
                         catchableMobsStr.append(Settings.lang.getColored("all-monsters")).append(", ");
-                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-monsters")));
+                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-monsters")).decoration(TextDecoration.ITALIC, false));
                         break;
                     case "ALL_FISH":
                         catchableMobsStr.append(Settings.lang.getColored("all-fish")).append(", ");
-                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-fish")));
+                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-fish")).decoration(TextDecoration.ITALIC, false));
                         break;
                     case "ALL_WATER_MOBS":
                         catchableMobsStr.append(Settings.lang.getColored("all-water-mobs")).append(", ");
-                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-water-mobs")));
+                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-water-mobs")).decoration(TextDecoration.ITALIC, false));
                         break;
                     case "ALL_MOBS":
                         catchableMobsStr.append(Settings.lang.getColored("all-mobs")).append(", ");
-                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-mobs")));
+                        catchableMobComponents.add(Component.text(Settings.lang.getColored("all-mobs")).decoration(TextDecoration.ITALIC, false));
                         break;
                 }
             }

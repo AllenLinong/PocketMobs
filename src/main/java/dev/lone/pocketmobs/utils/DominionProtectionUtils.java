@@ -3,6 +3,7 @@ package dev.lone.pocketmobs.utils;
 import dev.lone.pocketmobs.Main;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -64,6 +65,85 @@ public final class DominionProtectionUtils
         {
             logIntegrationError(exception);
             return true;
+        }
+    }
+
+    public static boolean canReleaseMob(Player player, EntityType entityType, Location location)
+    {
+        Plugin dominion = Main.inst.getServer().getPluginManager().getPlugin(DOMINION_PLUGIN);
+        if (dominion == null || !dominion.isEnabled())
+            return true;
+
+        try
+        {
+            resolveApi();
+            if (getInstanceMethod == null || getDominionMethod == null || getPrivilegeMethod == null)
+                return true;
+
+            Object api = getInstanceMethod.invoke(null);
+            Object dominionAtLocation = getDominionMethod.invoke(api, location);
+            if (dominionAtLocation == null)
+                return true;
+
+            Field flagField = entityType == EntityType.VILLAGER
+                    ? villagerKillingFlag
+                    : isMonster(entityType) ? monsterKillingFlag : animalKillingFlag;
+
+            // Monsters may only be released in the releaser's own Dominion.
+            // This restriction is intentionally stronger than the monster-killing
+            // privilege: guest damage permission must not allow monster spawning in
+            // another player's territory.
+            if (isMonster(entityType))
+            {
+                Method ownerMethod = dominionAtLocation.getClass().getMethod("getOwner");
+                Object owner = ownerMethod.invoke(dominionAtLocation);
+                boolean ownerOrCoOwner = owner instanceof java.util.UUID ownerId
+                        && ownerId.equals(player.getUniqueId());
+
+                if (!ownerOrCoOwner)
+                {
+                    // Dominion has no universal "co-owner" API. A member assigned
+                    // to a group with the monster-killing privilege is treated as a
+                    // co-owner for this monster-release restriction.
+                    Method getMember = api.getClass().getMethod("getMember",
+                            dominionAtLocation.getClass().getInterfaces()[0], Player.class);
+                    Object member = getMember.invoke(api, dominionAtLocation, player);
+                    if (member != null)
+                    {
+                        Method getGroup = api.getClass().getMethod("getGroup", member.getClass().getInterfaces()[0]);
+                        Object group = getGroup.invoke(api, member);
+                        if (group != null)
+                        {
+                            Method getGroupFlag = group.getClass().getMethod("getFlagValue", flagField.getType());
+                            ownerOrCoOwner = Boolean.TRUE.equals(getGroupFlag.invoke(group, flagField.get(null)));
+                        }
+                    }
+                }
+
+                if (!ownerOrCoOwner)
+                    return false;
+            }
+
+            Object flag = flagField.get(null);
+            return (boolean) getPrivilegeMethod.invoke(api, location, flag, player);
+        }
+        catch (ReflectiveOperationException | ClassCastException | LinkageError exception)
+        {
+            logIntegrationError(exception);
+            return true;
+        }
+    }
+
+    private static boolean isMonster(EntityType entityType)
+    {
+        try
+        {
+            Class<?> monsterClass = entityType.getEntityClass();
+            return monsterClass != null && Monster.class.isAssignableFrom(monsterClass);
+        }
+        catch (LinkageError ignored)
+        {
+            return false;
         }
     }
 

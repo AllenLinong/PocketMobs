@@ -15,8 +15,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityRemoveEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
@@ -24,6 +26,8 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -42,6 +46,7 @@ import java.util.logging.Level;
 public class BallsEventsListener implements Listener
 {
     private static final long CLEANUP_INTERVAL = 20L * 30;
+    private static final long THROWN_BALL_TIMEOUT = 20L * 5;
     private static final int MAX_CACHE_SIZE = Constants.MAX_CACHE_SIZE;
 
     private final Map<Integer, Item> balls = new ConcurrentHashMap<>();
@@ -327,6 +332,27 @@ public class BallsEventsListener implements Listener
             }
         }
 
+        // Protection plugins can cancel or consume the projectile-hit event.
+        // If that happens, the normal recovery path is never called and the item
+        // would remain permanently unpickable. Recover it on its owning region
+        // after a short timeout unless a hit handler already claimed it.
+        drop.getScheduler().runDelayed(Main.inst, task -> {
+            boolean stillTracked;
+            synchronized (ballOperationLock)
+            {
+                stillTracked = balls.get(drop.getEntityId()) == drop;
+                if (stillTracked)
+                {
+                    balls.remove(drop.getEntityId());
+                    ballsByPlayer.remove(drop.getEntityId());
+                }
+            }
+            if (stillTracked && !drop.isDead())
+            {
+                leaveBallRecoverable(drop, drop.getLocation());
+            }
+        }, null, THROWN_BALL_TIMEOUT);
+
         return new ThrownBallResult(drop, drop.getEntityId());
     }
     
@@ -344,7 +370,7 @@ public class BallsEventsListener implements Listener
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
     private void onSnowballHit(ProjectileHitEvent e)
     {
         if (!(e.getEntity() instanceof Snowball))
@@ -457,6 +483,12 @@ public class BallsEventsListener implements Listener
         if (!DominionProtectionUtils.canCatchMob(player, mobEntity, mobEntity.getLocation()))
         {
             rejectCatch(ballEntity, player, PBCatch, "cant-catch-other-dominion");
+            return;
+        }
+
+        if (!PerfectSelfWorldProtectionUtils.canCatchMob(player, mobEntity))
+        {
+            rejectCatch(ballEntity, player, PBCatch, "cant-catch-here");
             return;
         }
         ItemStack ballItemStack = ballEntity.getItemStack();
@@ -644,8 +676,17 @@ public class BallsEventsListener implements Listener
             return;
 
         int PBSpawn = e.getEntity().getMetadata("PBSpawn").get(0).asInt();
-        Item drop = balls.get(PBSpawn);
-        Player player = ballsByPlayer.get(PBSpawn);
+        Item drop;
+        Player player;
+        synchronized (ballOperationLock)
+        {
+            // Claim this release exactly once. ProjectileHitEvent can be observed
+            // more than once by concurrent region/event processing; leaving the
+            // entries in the maps until the end allowed every callback to spawn
+            // the stored mob again.
+            drop = balls.remove(PBSpawn);
+            player = ballsByPlayer.remove(PBSpawn);
+        }
 
         if (drop == null)
         {
@@ -705,13 +746,46 @@ public class BallsEventsListener implements Listener
                 return;
             }
 
-            Entity spawnedMob = Ball.freeMob(drop, hitLocation);
+            EntityType storedMobType = Ball.getStoredMobType(drop.getItemStack());
+            if (storedMobType != null
+                    && storedMobType.getEntityClass() != null
+                    && Monster.class.isAssignableFrom(storedMobType.getEntityClass())
+                    && !PerfectSelfWorldProtectionUtils.canReleaseMonster(player, hitLocation))
+            {
+                returnBallToPlayer(drop, player);
+                showMessageFeedback(player, Settings.lang.getColored("cant-release-here"));
+                cleanupMaps(PBSpawn);
+                return;
+            }
+
+            if (storedMobType != null
+                    && !DominionProtectionUtils.canReleaseMob(player, storedMobType, hitLocation))
+            {
+                returnBallToPlayer(drop, player);
+                showMessageFeedback(player, Settings.lang.getColored("cant-release-here"));
+                cleanupMaps(PBSpawn);
+                return;
+            }
+
+            // Release from a detached copy first. This keeps the live ball intact
+            // until all release-protection checks have passed.
+            ItemStack loadedBall = drop.getItemStack().clone();
+            Entity spawnedMob = Ball.freeMob(loadedBall, hitLocation);
 
             if (spawnedMob != null)
             {
-                drop.remove();
+                if (!PerfectSelfWorldProtectionUtils.canReleaseMob(player, spawnedMob))
+                {
+                    spawnedMob.remove();
+                    returnBallToPlayer(drop, player);
+                    showMessageFeedback(player, Settings.lang.getColored("cant-release-here"));
+                    cleanupMaps(PBSpawn);
+                    return;
+                }
 
-                // Build the empty ball first so we can inspect its remaining usages.
+                // Reuse the visible thrown item instead of deleting it and creating
+                // another Item entity. This guarantees the entity the player sees has
+                // its mob PDC/lore cleared and its infinite flight pickup delay reset.
                 ItemStack emptyBall = Ball.removeMob(drop.getItemStack().clone());
                 Ball newBallSettings = Main.inst.ballsManager.byItemStack(emptyBall);
 
@@ -732,20 +806,18 @@ public class BallsEventsListener implements Listener
 
                 if (!depleted)
                 {
-                    Item newPoke = hitLocation.getWorld().dropItem(hitLocation, emptyBall);
-                    newPoke.setCustomNameVisible(false);
-                    newPoke.setPickupDelay(0);
-                    if (Settings.returnToInvFree && player != null)
-                    {
-                        Location playerLocation = player.getLocation();
-                        newPoke.teleportAsync(playerLocation).thenAccept(ok -> {
-                            if (ok && !newPoke.isDead())
-                            {
-                                newPoke.setVelocity(new Vector(0, 0, 0));
-                                newPoke.setPickupDelay(0);
-                            }
-                        });
-                    }
+                    drop.setItemStack(emptyBall);
+                    drop.setCustomName(null);
+                    drop.setCustomNameVisible(false);
+                    settleBall(drop);
+                    Location recoveryLocation = Settings.returnToInvFree && player != null
+                            ? player.getLocation()
+                            : hitLocation;
+                    leaveBallRecoverable(drop, recoveryLocation);
+                }
+                else
+                {
+                    drop.remove();
                 }
             }
             else
@@ -830,6 +902,81 @@ public class BallsEventsListener implements Listener
         if (e.getItem().hasMetadata("PBIsBall"))
         {
             e.getItem().setVelocity(new Vector(0.2, 0.2, 0.2));
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    private void onPlayerPickupBall(PlayerAttemptPickupItemEvent e)
+    {
+        if (Ball.is(e.getItem().getItemStack()) && e.isCancelled())
+        {
+            Player player = e.getPlayer();
+            Item item = e.getItem();
+            ItemStack stack = item.getItemStack().clone();
+            Map<Integer, ItemStack> leftovers = player.getInventory().addItem(stack);
+            e.setCancelled(true);
+            if (leftovers.isEmpty())
+            {
+                item.remove();
+            }
+            else
+            {
+                item.setItemStack(leftovers.values().iterator().next());
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    private void onEntityPickupBall(EntityPickupItemEvent e)
+    {
+        // Some protection plugins cancel the parent entity-pickup event instead
+        // of PlayerAttemptPickupItemEvent. Handle that path as well so a released
+        // empty ball is not left permanently unpickable for visitors.
+        if (e.getEntity() instanceof Player && Ball.is(e.getItem().getItemStack()) && e.isCancelled())
+        {
+            Player player = (Player) e.getEntity();
+            Item item = e.getItem();
+            Map<Integer, ItemStack> leftovers = player.getInventory().addItem(item.getItemStack().clone());
+            e.setCancelled(true);
+            if (leftovers.isEmpty())
+            {
+                item.remove();
+            }
+            else
+            {
+                item.setItemStack(leftovers.values().iterator().next());
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    @SuppressWarnings("deprecation")
+    private void onLegacyPlayerPickupBall(PlayerPickupItemEvent e)
+    {
+        // Keep compatibility with protection plugins that still cancel the legacy
+        // PlayerPickupItemEvent instead of the modern parent/attempt events.
+        if (Ball.is(e.getItem().getItemStack()) && e.isCancelled())
+        {
+            Map<Integer, ItemStack> leftovers = e.getPlayer().getInventory().addItem(e.getItem().getItemStack().clone());
+            e.setCancelled(true);
+            if (leftovers.isEmpty())
+            {
+                e.getItem().remove();
+            }
+            else
+            {
+                e.getItem().setItemStack(leftovers.values().iterator().next());
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    private void onBallPlace(BlockPlaceEvent e)
+    {
+        if (Ball.is(e.getItemInHand()))
+        {
+            // A PocketMobs ball is an interaction item, never a placeable block.
             e.setCancelled(true);
         }
     }
@@ -970,7 +1117,9 @@ public class BallsEventsListener implements Listener
 
     private boolean isWorldAllowed(String worldName)
     {
-        return Settings.worlds.isEmpty() || Settings.worlds.contains(worldName);
+        if (Settings.worldWhitelistEnabled && !Settings.worlds.contains(worldName))
+            return false;
+        return !Settings.worldBlacklistEnabled || !Settings.worldBlacklist.contains(worldName);
     }
 
     private void returnBallToPlayer(Item ballEntity, Player player)
@@ -988,6 +1137,7 @@ public class BallsEventsListener implements Listener
     {
         ballEntity.setPickupDelay(0);
         ballEntity.setInvulnerable(false);
+        ballEntity.removeMetadata("PBIsBall", Main.inst);
     }
 
     /**
@@ -1004,6 +1154,7 @@ public class BallsEventsListener implements Listener
     {
         if (ballEntity.isDead())
             return;
+        settleBall(ballEntity);
         ballEntity.teleportAsync(location).thenAccept(success -> {
             if (success && !ballEntity.isDead())
             {

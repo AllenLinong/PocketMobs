@@ -1,6 +1,6 @@
 # PocketMobs 配置文件
 # Configuration version - DO NOT MODIFY
-config-version: 3
+config-version: 4
 lang: zh
 debug: false
 logic:
@@ -20,10 +20,25 @@ logic:
     # When a filled ball is dispensed from a dropper, spawn the stored mob there.
     dropper-spawns-mob: false
 keep-entity-uuid: false
-worlds:
-  - world
-  - world_nether
-  - world_the_end
+# 世界过滤设置：白名单和黑名单可以分别开关。
+#
+# 白名单开启后，只允许 whitelist.worlds 中的世界使用精灵球功能。
+# 黑名单开启后，blacklist.worlds 中的世界禁止使用精灵球功能。
+# 两者同时开启时，黑名单优先；两者都关闭时，不限制世界。
+#
+# 如果服务器安装了 PerfectSelfWorld，捕捉生物时会模拟一次玩家对目标生物的
+# 伤害事件，用于检查玩家是否拥有该家园区域的伤害权限；此操作不会实际造成伤害。
+# 没有伤害权限时禁止捕捉，未安装 PerfectSelfWorld 时会自动跳过此检查。
+world-filter:
+  whitelist:
+    enabled: true
+    worlds:
+      - world
+      - world_nether
+      - world_the_end
+  blacklist:
+    enabled: false
+    worlds: []
 default:
   ball:
     effects:
