@@ -116,7 +116,7 @@ public class BallsEventsListener implements Listener
 
     public void cleanupAll()
     {
-        // 停止定时清理任务
+        // 鍋滄瀹氭椂娓呯悊浠诲姟
         if (cleanupTask != null)
         {
             cleanupTask.cancel();
@@ -144,16 +144,13 @@ public class BallsEventsListener implements Listener
     }
     
     /**
-     * 玩家退出时清理投掷中的球
-     */
+     * 鐜╁閫€鍑烘椂娓呯悊鎶曟幏涓殑鐞?     */
     @EventHandler(priority = EventPriority.MONITOR)
     private void onPlayerQuit(PlayerQuitEvent e)
     {
         Player player = e.getPlayer();
         craftMessageCooldowns.remove(player.getUniqueId());
         HologramUtil.clearPlayerCooldown(player.getUniqueId());
-        
-        // 清理该玩家投掷的所有球。location 在事件线程（拥有该玩家）上读取后再传入。
         Location target = player.getLocation();
         synchronized (ballOperationLock)
         {
@@ -169,8 +166,7 @@ public class BallsEventsListener implements Listener
                     balls.remove(entityId);
                     if (ballItem != null)
                     {
-                        // 球可能归属其它区域线程，恢复操作在球自身线程上执行。
-                        recoverBallOnItsThread(ballItem, target);
+                        // 鐞冨彲鑳藉綊灞炲叾瀹冨尯鍩熺嚎绋嬶紝鎭㈠鎿嶄綔鍦ㄧ悆鑷韩绾跨▼涓婃墽琛屻€?                        recoverBallOnItsThread(ballItem, target);
                     }
                 }
             }
@@ -178,8 +174,7 @@ public class BallsEventsListener implements Listener
     }
     
     /**
-     * 世界卸载时清理该世界中的球
-     */
+     * 涓栫晫鍗歌浇鏃舵竻鐞嗚涓栫晫涓殑鐞?     */
     @EventHandler(priority = EventPriority.MONITOR)
     private void onWorldUnload(WorldUnloadEvent e)
     {
@@ -204,14 +199,12 @@ public class BallsEventsListener implements Listener
     }
     
     /**
-     * 玩家死亡时处理装着生物的球
+     * 鐜╁姝讳骸鏃跺鐞嗚鐫€鐢熺墿鐨勭悆
      */
     @EventHandler(priority = EventPriority.HIGH)
     private void onPlayerDeath(PlayerDeathEvent e)
     {
         Player player = e.getEntity();
-
-        // 确保球会掉落在死亡位置；location 在事件线程上读取。
         Location target = player.getLocation();
         synchronized (ballOperationLock)
         {
@@ -230,14 +223,11 @@ public class BallsEventsListener implements Listener
     }
     
     /**
-     * 玩家切换世界时检查权限
-     */
+     * 鐜╁鍒囨崲涓栫晫鏃舵鏌ユ潈闄?     */
     @EventHandler(priority = EventPriority.HIGH)
     private void onPlayerChangedWorld(PlayerChangedWorldEvent e)
     {
         Player player = e.getPlayer();
-        
-        // 清理旧世界中该玩家投掷的球；location 在事件线程上读取。
         Location target = player.getLocation();
         synchronized (ballOperationLock)
         {
@@ -253,7 +243,7 @@ public class BallsEventsListener implements Listener
                     balls.remove(entityId);
                     if (ballItem != null)
                     {
-                        // 将球返回给玩家（在球自身线程上传送）
+                        // 灏嗙悆杩斿洖缁欑帺瀹讹紙鍦ㄧ悆鑷韩绾跨▼涓婁紶閫侊級
                         recoverBallOnItsThread(ballItem, target);
                     }
                 }
@@ -305,10 +295,8 @@ public class BallsEventsListener implements Listener
     }
     
     /**
-     * 创建投掷的球的通用方法
-     * @param player 投掷者
-     * @param ball 球物品
-     * @return 投掷结果，包含掉落物和实体ID
+     * 鍒涘缓鎶曟幏鐨勭悆鐨勯€氱敤鏂规硶
+     * @param player 鎶曟幏鑰?     * @param ball 鐞冪墿鍝?     * @return 鎶曟幏缁撴灉锛屽寘鍚帀钀界墿鍜屽疄浣揑D
      */
     private ThrownBallResult createThrownBall(Player player, ItemStack ball)
     {
@@ -343,8 +331,7 @@ public class BallsEventsListener implements Listener
     }
     
     /**
-     * 投掷球结果的数据类
-     */
+     * 鎶曟幏鐞冪粨鏋滅殑鏁版嵁绫?     */
     private static class ThrownBallResult
     {
         final Item drop;
@@ -467,6 +454,11 @@ public class BallsEventsListener implements Listener
             return;
         }
 
+        if (!DominionProtectionUtils.canCatchMob(player, mobEntity, mobEntity.getLocation()))
+        {
+            rejectCatch(ballEntity, player, PBCatch, "cant-catch-other-dominion");
+            return;
+        }
         ItemStack ballItemStack = ballEntity.getItemStack();
 
         // A depleted limited-usage ball (0 left) must never be able to catch.
@@ -681,8 +673,7 @@ public class BallsEventsListener implements Listener
 
         if (Ball.hasMob(drop.getItemStack()))
         {
-            // 世界白名单校验：与捕捉(handleCatch)和发射器(onDropperDispense)路径保持一致，
-            // 否则玩家可用满球在被禁用的世界里释放 mob，绕过世界限制。
+            // 涓栫晫鐧藉悕鍗曟牎楠岋細涓庢崟鎹?handleCatch)鍜屽彂灏勫櫒(onDropperDispense)璺緞淇濇寔涓€鑷达紝
             if (!isWorldAllowed(hitLocation.getWorld().getName()))
             {
                 if (player != null)
@@ -698,7 +689,7 @@ public class BallsEventsListener implements Listener
                 return;
             }
 
-            // 检查保护插件权限
+            // Check protection plugin permission.
             if (player == null)
             {
                 leaveBallRecoverable(drop, hitLocation);
@@ -906,7 +897,7 @@ public class BallsEventsListener implements Listener
             if (spawned == null)
             {
                 // Spawn failed: put the still-loaded ball back so it stays
-                // recoverable (net zero — one removed, one restored, no dupe).
+                // recoverable (net zero 鈥?one removed, one restored, no dupe).
                 for (ItemStack leftover : inv.addItem(ballTemplate.clone()).values())
                 {
                     spawnLocation.getWorld().dropItem(spawnLocation, leftover);
@@ -915,7 +906,7 @@ public class BallsEventsListener implements Listener
             }
 
             // Mob freed: hand back the empty ball, unless it is a spent limited-usage
-            // ball (0 left) — those would be a useless, exploitable 0-use husk, so
+            // ball (0 left) 鈥?those would be a useless, exploitable 0-use husk, so
             // don't drop them. Unlimited balls skip usage accounting and are exempt;
             // getUsages() returns 1 when the tag is absent, so legacy balls drop.
             ItemStack emptyBall = Ball.removeMob(ballTemplate.clone());
@@ -950,8 +941,8 @@ public class BallsEventsListener implements Listener
     }
     
     /**
-     * 检查是否为Boss实体
-     * Boss实体不应该被捕捉，以保持游戏平衡
+     * 妫€鏌ユ槸鍚︿负Boss瀹炰綋
+     * Boss瀹炰綋涓嶅簲璇ヨ鎹曟崏锛屼互淇濇寔娓告垙骞宠　
      */
     private boolean isBossEntity(EntityType type)
     {
@@ -1022,3 +1013,5 @@ public class BallsEventsListener implements Listener
         });
     }
 }
+
+
