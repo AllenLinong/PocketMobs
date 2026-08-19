@@ -21,6 +21,7 @@ failed-to-spawn-mob: "<red>Failed to spawn mob! Try to find another area! (maybe
 caugth-successfully: "<green>Caught successfully!"
 cant-catch-with-this-ball: "<red>You can't catch this mob with this ball."
 cant-catch-here: "<red>You don't have permission to catch mobs here!"
+cant-catch-other-dominion: "<red>You can't catch mobs in another player's Dominion!"
 cant-release-here: "<red>You don't have permission to release mobs here!"
 world-not-allowed: "<red>You can't use balls in this world!"
 missed-catch: "<red>Missed! Try again!"
@@ -158,3 +159,5 @@ mob-detail.value.diamond_horse_armor: "Diamond Horse Armor"
 mob-detail.value.golden_horse_armor: "Golden Horse Armor"
 mob-detail.value.iron_horse_armor: "Iron Horse Armor"
 mob-detail.value.leather_horse_armor: "Leather Horse Armor"
+
+
