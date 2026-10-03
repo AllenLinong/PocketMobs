@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Settings
 {
-    private static final int CURRENT_CONFIG_VERSION = 4;
+    private static final int CURRENT_CONFIG_VERSION = 5;
 
     // These are read from Folia region threads (event handlers) while reload()
     // writes them on another thread, so they are volatile for safe publication.
@@ -29,6 +29,8 @@ public class Settings
     public static volatile boolean reduceUsagesOnMiss;
     public static volatile boolean restoreFullHealthOnRelease;
     public static volatile boolean keepEntityUuid;
+    public static volatile boolean blockOthersTamedPets;
+    public static volatile boolean blockPetPluginPets;
     public static volatile boolean debug;
     private static volatile boolean loaded = false;
 
@@ -69,6 +71,8 @@ public class Settings
             reduceUsagesOnMiss = true;
             restoreFullHealthOnRelease = false;
             keepEntityUuid = false;
+            blockOthersTamedPets = true;
+            blockPetPluginPets = true;
             debug = false;
         }
     }
@@ -160,6 +164,8 @@ public class Settings
         reduceUsagesOnMiss = config.getBoolean("logic.ball-behaviour.reduce-usages.miss-target", true);
         restoreFullHealthOnRelease = config.getBoolean("logic.ball-behaviour.restore-full-health.on-free-mob", false);
         keepEntityUuid = config.getBoolean("keep-entity-uuid", false);
+        blockOthersTamedPets = config.getBoolean("logic.catch-protection.block-other-players-pets", true);
+        blockPetPluginPets = config.getBoolean("logic.catch-protection.block-pet-plugin-pets", true);
         debug = config.getBoolean("debug", false);
     }
 
@@ -224,6 +230,19 @@ public class Settings
                 if (!cfg.contains("world-filter.blacklist.worlds"))
                 {
                     cfg.set("world-filter.blacklist.worlds", new ArrayList<String>());
+                }
+            }
+
+            // Version 4 -> 5: add pet capture protections.
+            if (version < 5)
+            {
+                if (!cfg.contains("logic.catch-protection.block-other-players-pets"))
+                {
+                    cfg.set("logic.catch-protection.block-other-players-pets", true);
+                }
+                if (!cfg.contains("logic.catch-protection.block-pet-plugin-pets"))
+                {
+                    cfg.set("logic.catch-protection.block-pet-plugin-pets", true);
                 }
             }
 

@@ -10,6 +10,7 @@ softdepend:
   - Essentials
   - Dominion
   - PerfectSelfWorld
+  - MyPet
 commands:
   pocketmob:
     description: Main command for PocketMobs plugin

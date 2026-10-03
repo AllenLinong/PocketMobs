@@ -444,6 +444,43 @@ public class BallsEventsListener implements Listener
         return null;
     }
 
+    /**
+     * Returns the lang key explaining why {@code mobEntity} is a pet that
+     * {@code player} may not catch, or {@code null} when catching is allowed.
+     * <p>
+     * Vanilla tamed pets (wolf, cat, parrot, horse, ...) can still be caught by
+     * their own owner. Mobs managed by pet plugins (MyPet & co.) can never be
+     * caught: their data belongs to the plugin, not to the world, and storing
+     * them in a ball would corrupt or duplicate the pet.
+     */
+    private String petCatchRejectionKey(Player player, Entity mobEntity)
+    {
+        if (Settings.blockOthersTamedPets)
+        {
+            if (mobEntity instanceof Tameable tameable && tameable.isTamed())
+            {
+                AnimalTamer tamer = tameable.getOwner();
+                if (tamer == null || !tamer.getUniqueId().equals(player.getUniqueId()))
+                    return "cant-catch-tamed-pet";
+            }
+
+            // A mob led on a leash by someone else is being walked by its
+            // holder: treat it like a tamed pet.
+            if (mobEntity instanceof LivingEntity living
+                    && living.isLeashed()
+                    && living.getLeashHolder() instanceof Player holder
+                    && !holder.getUniqueId().equals(player.getUniqueId()))
+            {
+                return "cant-catch-tamed-pet";
+            }
+        }
+
+        if (Settings.blockPetPluginPets && PetProtection.isPetPluginMob(mobEntity))
+            return "cant-catch-plugin-pet";
+
+        return null;
+    }
+
     private void handleCatch(Item ballEntity, Player player, Entity mobEntity, int PBCatch)
     {
         Ball settings = Main.inst.ballsManager.byItemStack(ballEntity.getItemStack());
@@ -464,6 +501,13 @@ public class BallsEventsListener implements Listener
         if (rejectKey != null)
         {
             rejectCatch(ballEntity, player, PBCatch, rejectKey);
+            return;
+        }
+
+        String petRejectKey = petCatchRejectionKey(player, mobEntity);
+        if (petRejectKey != null)
+        {
+            rejectCatch(ballEntity, player, PBCatch, petRejectKey);
             return;
         }
 

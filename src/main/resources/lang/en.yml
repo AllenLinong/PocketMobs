@@ -21,6 +21,8 @@ failed-to-spawn-mob: "<red>Failed to spawn mob! Try to find another area! (maybe
 caugth-successfully: "<green>Caught successfully!"
 cant-catch-with-this-ball: "<red>You can't catch this mob with this ball."
 cant-catch-here: "<red>You don't have permission to catch mobs here!"
+cant-catch-tamed-pet: "<red>This mob is tamed by another player, you can't catch it!"
+cant-catch-plugin-pet: "<red>You can't catch pets of pet plugins like MyPet!"
 cant-catch-other-dominion: "<red>You can't catch mobs in another player's Dominion!"
 cant-release-here: "<red>You don't have permission to release mobs here!"
 world-not-allowed: "<red>You can't use balls in this world!"

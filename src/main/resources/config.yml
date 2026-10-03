@@ -1,6 +1,6 @@
 # PocketMobs 配置文件
 # Configuration version - DO NOT MODIFY
-config-version: 4
+config-version: 5
 lang: zh
 debug: false
 logic:
@@ -19,6 +19,17 @@ logic:
     # 满球被发射器(dropper)射出时，在发射器处直接释放存储的生物。
     # When a filled ball is dispensed from a dropper, spawn the stored mob there.
     dropper-spawns-mob: false
+  # 捕捉保护：防止把其他玩家的宠物收进球里。
+  # Catch protection: prevent catching other players' pets.
+  catch-protection:
+    # 拦截捕捉其他玩家驯服的宠物（狼、猫、鹦鹉、马等，含被其他玩家用拴绳牵着的生物）。
+    # 玩家仍可捕捉自己的宠物。
+    # Block catching vanilla pets tamed by other players (wolf, cat, parrot, horse,
+    # including mobs leashed by another player). Players can still catch their own pets.
+    block-other-players-pets: true
+    # 拦截捕捉宠物插件生成的宠物（如 MyPet）。这类宠物的数据由插件管理，捕捉会导致宠物损坏或复制。
+    # Block catching pets spawned by pet plugins like MyPet.
+    block-pet-plugin-pets: true
 keep-entity-uuid: false
 # 世界过滤设置：白名单和黑名单可以分别开关。
 #
