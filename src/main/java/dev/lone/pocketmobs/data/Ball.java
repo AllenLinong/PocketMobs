@@ -54,6 +54,7 @@ public class Ball
 
     public List<String> lore;
     private List<String> configuredLore = new ArrayList<>();
+    private List<String> configuredFilledLore = new ArrayList<>();
 
     public List<String> catchableMobsStringList;
     public List<Component> catchableMobsLoreComponents;
@@ -143,17 +144,66 @@ public class Ball
         this.configuredLore = lore != null ? new ArrayList<>(lore) : new ArrayList<>();
     }
 
-    private List<Component> getConfiguredLore(ItemStack itemStack)
+    public void setConfiguredFilledLore(List<String> lore)
+    {
+        this.configuredFilledLore = lore != null ? new ArrayList<>(lore) : new ArrayList<>();
+    }
+
+    private List<Component> getConfiguredFilledLore(ItemStack itemStack, CaughtMob caughtMob, String overrideName)
     {
         List<Component> result = new ArrayList<>();
-        if (configuredLore == null || configuredLore.isEmpty()) return result;
-        String catchable = catchableMobsStringList == null ? "" : String.join(" ", catchableMobsStringList);
-        for (String line : configuredLore)
+        if (configuredFilledLore == null || configuredFilledLore.isEmpty()) return result;
+
+        String mobName = overrideName != null ? overrideName : "{mob-name-component}";
+        List<String> detailLines = caughtMob.getDisplayLoreLines();
+        for (String line : configuredFilledLore)
         {
             String rendered = line.replace("{usages}", String.valueOf(getUsages(itemStack)))
                     .replace("{max-usages}", String.valueOf(maxUsages))
                     .replace("{catch-chance}", getCatchSuccess(itemStack) + "%")
-                    .replace("{catchable-mobs}", catchable);
+                    .replace("{mob-life}", String.valueOf(caughtMob.getLife()))
+                    .replace("{mob-name}", mobName);
+            if (Settings.lang != null)
+            {
+                rendered = rendered.replace("{lore-info}", Settings.lang.getColored("lore-info"))
+                        .replace("{lore-catch-chance}", Settings.lang.getColored("lore-catch-chance"))
+                        .replace("{lore-usages}", Settings.lang.getColored("lore-usages"))
+                        .replace("{lore-usage}", Settings.lang.getColored("lore-usage"))
+                        .replace("{lore-mob-name}", Settings.lang.getColored("lore-mob-name"))
+                        .replace("{lore-mob-details}", Settings.lang.getColored("lore-mob-details"))
+                        .replace("{lore-mob-life}", Settings.lang.getColored("lore-mob-life"));
+            }
+            if (rendered.contains("{mob-details}"))
+            {
+                String prefix = rendered.replace("{mob-details}", "");
+                for (String detailLine : detailLines)
+                {
+                    result.add(parseLoreLine(prefix + detailLine));
+                }
+            }
+            else if (rendered.contains("{mob-name-component}"))
+            {
+                String prefix = rendered.replace("{mob-name-component}", "");
+                result.add(parseLoreLine(prefix).append(LocaleUtils.getEntityTranslatable(caughtMob.getType())
+                        .color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)));
+            }
+            else
+            {
+                result.add(parseLoreLine(rendered));
+            }
+        }
+        return result;
+    }
+
+    private List<Component> getConfiguredLore(ItemStack itemStack)
+    {
+        List<Component> result = new ArrayList<>();
+        if (configuredLore == null || configuredLore.isEmpty()) return result;
+        for (String line : configuredLore)
+        {
+            String rendered = line.replace("{usages}", String.valueOf(getUsages(itemStack)))
+                    .replace("{max-usages}", String.valueOf(maxUsages))
+                    .replace("{catch-chance}", getCatchSuccess(itemStack) + "%");
             if (Settings.lang != null)
             {
                 rendered = rendered.replace("{lore-info}", Settings.lang.getColored("lore-info"))
@@ -164,7 +214,25 @@ public class Ball
                         .replace("{lore-throw}", Settings.lang.getColored("lore-throw"))
                         .replace("{lore-release}", Settings.lang.getColored("lore-release"));
             }
-            result.add(parseLoreLine(rendered));
+            if (rendered.contains("{catchable-mobs}"))
+            {
+                String prefix = rendered.replace("{catchable-mobs}", "");
+                if (catchableMobsLoreComponents != null && !catchableMobsLoreComponents.isEmpty())
+                {
+                    for (Component mobComponent : catchableMobsLoreComponents)
+                    {
+                        result.add(parseLoreLine(prefix).append(mobComponent));
+                    }
+                }
+                else
+                {
+                    result.add(parseLoreLine(prefix));
+                }
+            }
+            else
+            {
+                result.add(parseLoreLine(rendered));
+            }
         }
         return result;
     }
@@ -182,11 +250,8 @@ public class Ball
             {
             }
         }
-        String legacyLine = line == null ? "" : line;
-        LegacyComponentSerializer serializer = legacyLine.indexOf('§') >= 0
-                ? LegacyComponentSerializer.legacySection()
-                : LegacyComponentSerializer.legacyAmpersand();
-        return serializer.deserialize(legacyLine)
+        String legacyLine = ChatColor.translateAlternateColorCodes('&', line == null ? "" : line);
+        return LegacyComponentSerializer.legacySection().deserialize(legacyLine)
                 .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
@@ -514,6 +579,18 @@ public class Ball
             }
             List<String> detailLines = caughtMob.getDisplayLoreLines();
 
+            Ball original = Main.inst.ballsManager.byItemStack(ballItemStack);
+            if (original != null && original.configuredFilledLore != null && !original.configuredFilledLore.isEmpty())
+            {
+                ItemMeta meta = ballItemStack.getItemMeta();
+                if (meta != null)
+                {
+                    meta.lore(original.getConfiguredFilledLore(ballItemStack, caughtMob, overrideName));
+                    ballItemStack.setItemMeta(meta);
+                    return ballItemStack;
+                }
+            }
+
             List<Component> loreComponents = new ArrayList<>();
             loreComponents.add(Component.text(Settings.lang.getColored("usages").replace("{value}", getUsages(ballItemStack) + "")));
             loreComponents.add(Component.text(Settings.lang.getColored("catch-chance").replace("{value}", getCatchSuccess(ballItemStack) + "%")));
@@ -558,6 +635,19 @@ public class Ball
         else
         {
             Ball original = Main.inst.ballsManager.byItemStack(ballItemStack);
+
+            // Empty balls must always use their configured lore, including after
+            // a missed throw or after releasing a captured mob.
+            if (original != null && original.configuredLore != null && !original.configuredLore.isEmpty())
+            {
+                ItemMeta meta = ballItemStack.getItemMeta();
+                if (meta != null)
+                {
+                    meta.lore(original.getConfiguredLore(ballItemStack));
+                    ballItemStack.setItemMeta(meta);
+                    return ballItemStack;
+                }
+            }
 
             if (original != null && original.catchableMobsLoreComponents != null && !original.catchableMobsLoreComponents.isEmpty())
             {

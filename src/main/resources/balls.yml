@@ -113,6 +113,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {mob-details}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     # 玩家头颅纹理地址，也可以配合 item-material 使用其他材质。
     head-texture: "https://textures.minecraft.net/texture/556d2a1cdda8778ffd833c7a5f539b87f99eb83a5d19599e5fa8e6c966c37c2"
     # 精灵球最大使用次数。

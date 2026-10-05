@@ -95,6 +95,7 @@ public class BallsManager
             }
             tmp.setDisplayName(ChatColor.RESET + (displayName != null ? displayName : key));
             tmp.setConfiguredLore(config.getConfig().getStringList("balls." + key + ".lore"));
+            tmp.setConfiguredFilledLore(config.getConfig().getStringList("balls." + key + ".filled-lore"));
 
             if (Settings.config.getBoolean("logic.buy.enabled", true))
             {
