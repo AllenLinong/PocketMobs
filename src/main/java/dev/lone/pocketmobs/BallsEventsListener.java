@@ -22,6 +22,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -29,6 +30,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
@@ -60,6 +62,31 @@ public class BallsEventsListener implements Listener
     private final Object ballOperationLock = new Object();
 
     private ScheduledTask cleanupTask;
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    private void onPlayerJoin(PlayerJoinEvent e)
+    {
+        migrateBallFormatting(e.getPlayer().getInventory());
+        migrateBallFormatting(e.getPlayer().getEnderChest());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    private void onInventoryOpen(InventoryOpenEvent e)
+    {
+        migrateBallFormatting(e.getInventory());
+    }
+
+    private void migrateBallFormatting(Inventory inventory)
+    {
+        for (int slot = 0; slot < inventory.getSize(); slot++)
+        {
+            ItemStack item = inventory.getItem(slot);
+            if (Ball.removeItalicFormatting(item))
+            {
+                inventory.setItem(slot, item);
+            }
+        }
+    }
 
     public BallsEventsListener()
     {
@@ -953,6 +980,7 @@ public class BallsEventsListener implements Listener
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     private void onPlayerPickupBall(PlayerAttemptPickupItemEvent e)
     {
+        Ball.removeItalicFormatting(e.getItem().getItemStack());
         if (Ball.is(e.getItem().getItemStack()) && e.isCancelled())
         {
             Player player = e.getPlayer();
@@ -977,6 +1005,7 @@ public class BallsEventsListener implements Listener
         // Some protection plugins cancel the parent entity-pickup event instead
         // of PlayerAttemptPickupItemEvent. Handle that path as well so a released
         // empty ball is not left permanently unpickable for visitors.
+        Ball.removeItalicFormatting(e.getItem().getItemStack());
         if (e.getEntity() instanceof Player && Ball.is(e.getItem().getItemStack()) && e.isCancelled())
         {
             Player player = (Player) e.getEntity();

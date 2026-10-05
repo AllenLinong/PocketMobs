@@ -276,6 +276,38 @@ public class Ball
         return false;
     }
 
+    public static boolean removeItalicFormatting(ItemStack item)
+    {
+        if (!is(item)) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+        boolean changed = false;
+        Component displayName = meta.displayName();
+        if (displayName != null)
+        {
+            Component updatedName = displayName.decoration(TextDecoration.ITALIC, false);
+            if (!updatedName.equals(displayName))
+            {
+                meta.displayName(updatedName);
+                changed = true;
+            }
+        }
+        List<Component> lore = meta.lore();
+        if (lore != null && !lore.isEmpty())
+        {
+            List<Component> updatedLore = lore.stream()
+                    .map(line -> line.decoration(TextDecoration.ITALIC, false))
+                    .toList();
+            if (!updatedLore.equals(lore))
+            {
+                meta.lore(updatedLore);
+                changed = true;
+            }
+        }
+        if (changed) item.setItemMeta(meta);
+        return changed;
+    }
+
     public static boolean hasMob(ItemStack item)
     {
         if (item == null || item.getType() == Material.AIR)
