@@ -169,6 +169,8 @@ public class Ball
                         .replace("{lore-catch-chance}", Settings.lang.getColored("lore-catch-chance"))
                         .replace("{lore-usages}", Settings.lang.getColored("lore-usages"))
                         .replace("{lore-usage}", Settings.lang.getColored("lore-usage"))
+                        .replace("{lore-throw}", Settings.lang.getColored("lore-throw"))
+                        .replace("{lore-release}", Settings.lang.getColored("lore-release"))
                         .replace("{lore-mob-name}", Settings.lang.getColored("lore-mob-name"))
                         .replace("{lore-mob-details}", Settings.lang.getColored("lore-mob-details"))
                         .replace("{lore-mob-life}", Settings.lang.getColored("lore-mob-life"));
