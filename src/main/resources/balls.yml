@@ -95,6 +95,16 @@ balls:
       ingredients:
         O: OBSIDIAN
         E: ENDER_CHEST
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {mob-details}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
   # lore 文案使用语言占位符，由 lang/zh.yml 或 lang/en.yml 提供。
   # 动态变量：{catch-chance} 捕捉概率、{usages} 当前次数、{max-usages} 最大次数、{catchable-mobs} 可捕捉生物。
   # 自定义其他精灵球时可参照此格式，保留占位符即可随语言切换。
@@ -171,6 +181,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {{mob-details}}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     head-texture: "https://textures.minecraft.net/texture/10f09f4b7c4f828db6ed9d0827e7232796ae1675e02d83f962dc4557e16159c6"
     max-usages: 4
     catch-success: 60.0
@@ -200,6 +220,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {{mob-details}}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     head-texture: "https://textures.minecraft.net/texture/61da6d6200feed2b5faa3c2831a8f41e08b784ee5011f7bfa27ebd5bbe6a71f7"
     max-usages: 4
     catch-success: 50.0
@@ -219,6 +249,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {{mob-details}}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     head-texture: "https://textures.minecraft.net/texture/3f7b9a6f06b5e4b12b6abc214e9a312c0797896f2f3452d3bf0fc72f9fb053a"
     max-usages: 3
     catch-success: 60.0
@@ -237,6 +277,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {{mob-details}}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     head-texture: "https://textures.minecraft.net/texture/67752aea0bf348d5f5a21ddd743240d922b2ec86179fd0f41f4373f5fff4fe0ef"
     max-usages: 4
     catch-success: 50.0
@@ -257,6 +307,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {{mob-details}}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     head-texture: "https://textures.minecraft.net/texture/f5e3c33e432e1c1e0490431586d111c7eb87a53d37e0f91d02104c1b956dd6c1"
     max-usages: 5
     catch-success: 45.0
@@ -278,6 +338,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {{mob-details}}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     head-texture: "https://textures.minecraft.net/texture/e03f4c1676045a64c5709fbef9750597797362c6e471a9716d782601dce6fcb9"
     max-usages: 5
     catch-success: 45.0
@@ -297,6 +367,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {{mob-details}}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     head-texture: "https://textures.minecraft.net/texture/7ffcd905a5a9d2e70460599ec98269d1c7131fab13a32db53ab9643610fa5e3b"
     max-usages: 5
     catch-success: 45.0
@@ -317,6 +397,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {{mob-details}}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     head-texture: "https://textures.minecraft.net/texture/c353ec3fe05681b96f971ac66fa1337e04b2b1abc5ab54e58e16172e2394"
     max-usages: 5
     catch-success: 70.0
@@ -347,6 +437,16 @@ balls:
       - "&6▶ &8{lore-usage}"
       - "&7• &f{lore-throw}"
       - "&7• &f{lore-release}"
+    # 捕捉成功后满球的 lore；未配置时使用插件默认格式。
+    # 动态变量：{usages}、{max-usages}、{catch-chance}、{mob-name}、{mob-details}、{mob-life}。
+    filled-lore:
+      - "&6▶ &8{lore-info}"
+      - "&d▸ &7{lore-usages}: &f{usages}&7/&f{max-usages}"
+      - "&d▸ &7{lore-catch-chance}: &f{catch-chance}"
+      - "&d▸ &7{lore-mob-name}: &f{mob-name}"
+      - "&d▸ &7{lore-mob-details}:"
+      - "&f  {{mob-details}}"
+      - "&d▸ &7{lore-mob-life}: &f{mob-life}"
     head-texture: "https://textures.minecraft.net/texture/51f1eacbbe376557f5d7d3ece594db1338f6663662982cfc658c7a7dc639d77"
     max-usages: 5
     catch-success: 70.0
