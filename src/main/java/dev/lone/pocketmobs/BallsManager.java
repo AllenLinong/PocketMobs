@@ -89,7 +89,12 @@ public class BallsManager
             }
 
             String displayName = config.getString("balls." + key + ".display-name");
+            if (displayName != null)
+            {
+                displayName = ChatColor.translateAlternateColorCodes('&', displayName);
+            }
             tmp.setDisplayName(ChatColor.RESET + (displayName != null ? displayName : key));
+            tmp.setConfiguredLore(config.getConfig().getStringList("balls." + key + ".lore"));
 
             if (Settings.config.getBoolean("logic.buy.enabled", true))
             {

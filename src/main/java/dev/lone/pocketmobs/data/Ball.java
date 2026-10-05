@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -52,6 +53,7 @@ public class Ball
     public ShapedRecipe recipe;
 
     public List<String> lore;
+    private List<String> configuredLore = new ArrayList<>();
 
     public List<String> catchableMobsStringList;
     public List<Component> catchableMobsLoreComponents;
@@ -136,6 +138,58 @@ public class Ball
         this.lore = lore;
     }
 
+    public void setConfiguredLore(List<String> lore)
+    {
+        this.configuredLore = lore != null ? new ArrayList<>(lore) : new ArrayList<>();
+    }
+
+    private List<Component> getConfiguredLore(ItemStack itemStack)
+    {
+        List<Component> result = new ArrayList<>();
+        if (configuredLore == null || configuredLore.isEmpty()) return result;
+        String catchable = catchableMobsStringList == null ? "" : String.join(" ", catchableMobsStringList);
+        for (String line : configuredLore)
+        {
+            String rendered = line.replace("{usages}", String.valueOf(getUsages(itemStack)))
+                    .replace("{max-usages}", String.valueOf(maxUsages))
+                    .replace("{catch-chance}", getCatchSuccess(itemStack) + "%")
+                    .replace("{catchable-mobs}", catchable);
+            if (Settings.lang != null)
+            {
+                rendered = rendered.replace("{lore-info}", Settings.lang.getColored("lore-info"))
+                        .replace("{lore-catch-chance}", Settings.lang.getColored("lore-catch-chance"))
+                        .replace("{lore-usages}", Settings.lang.getColored("lore-usages"))
+                        .replace("{lore-catchable}", Settings.lang.getColored("lore-catchable"))
+                        .replace("{lore-usage}", Settings.lang.getColored("lore-usage"))
+                        .replace("{lore-throw}", Settings.lang.getColored("lore-throw"))
+                        .replace("{lore-release}", Settings.lang.getColored("lore-release"));
+            }
+            result.add(parseLoreLine(rendered));
+        }
+        return result;
+    }
+
+    private static Component parseLoreLine(String line)
+    {
+        if (line != null && line.matches(".*<[#/]?[a-zA-Z0-9_:.#-]+>.*"))
+        {
+            try
+            {
+                return MiniMessage.miniMessage().deserialize(line)
+                        .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+            }
+            catch (Exception ignored)
+            {
+            }
+        }
+        String legacyLine = line == null ? "" : line;
+        LegacyComponentSerializer serializer = legacyLine.indexOf('§') >= 0
+                ? LegacyComponentSerializer.legacySection()
+                : LegacyComponentSerializer.legacyAmpersand();
+        return serializer.deserialize(legacyLine)
+                .decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE);
+    }
+
     public void setBuyPrice(double buyPrice)
     {
         this.buyPrice = buyPrice;
@@ -193,7 +247,10 @@ public class Ball
             {
                 // Faithfully translate the stored legacy (§/&) display name to a
                 // Component so rendering matches the deprecated setDisplayName path.
-                meta.displayName(LegacyComponentSerializer.legacySection().deserialize(displayName));
+                // Custom name components render italic unless explicitly disabled,
+                // so force italic off unless the display-name itself asks for §o.
+                meta.displayName(LegacyComponentSerializer.legacySection().deserialize(displayName)
+                        .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
             }
             if (customModelData >= 0)
             {
@@ -552,6 +609,17 @@ public class Ball
 
     private ItemStack applyEmptyLore(ItemStack ballItemStack)
     {
+        if (configuredLore != null && !configuredLore.isEmpty())
+        {
+            ItemMeta meta = ballItemStack.getItemMeta();
+            if (meta != null)
+            {
+                meta.lore(getConfiguredLore(ballItemStack));
+                ballItemStack.setItemMeta(meta);
+                return ballItemStack;
+            }
+        }
+
         if (catchableMobsLoreComponents != null && !catchableMobsLoreComponents.isEmpty())
         {
             List<Component> loreComponents = new ArrayList<>();

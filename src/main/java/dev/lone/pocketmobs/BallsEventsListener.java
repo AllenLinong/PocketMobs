@@ -49,6 +49,7 @@ public class BallsEventsListener implements Listener
 {
     private static final long CLEANUP_INTERVAL = 20L * 30;
     private static final long THROWN_BALL_TIMEOUT = 20L * 5;
+    private static final long MISSED_BALL_RETURN_DELAY = 20L * 3;
     private static final int MAX_CACHE_SIZE = Constants.MAX_CACHE_SIZE;
 
     private final Map<Integer, Item> balls = new ConcurrentHashMap<>();
@@ -696,7 +697,27 @@ public class BallsEventsListener implements Listener
         {
             ballEntity.setCustomNameVisible(true);
             ballEntity.setCustomName(Settings.lang.getColored("missed-catch"));
-            settleBall(ballEntity);
+            if (Settings.returnToInvCatch)
+            {
+                Location playerLocation = player != null ? player.getLocation() : null;
+                if (playerLocation != null)
+                {
+                    ballEntity.getScheduler().runDelayed(Main.inst, task -> {
+                        if (!ballEntity.isDead())
+                        {
+                            returnBallToPlayer(ballEntity, player);
+                        }
+                    }, null, MISSED_BALL_RETURN_DELAY);
+                }
+                else
+                {
+                    settleBall(ballEntity);
+                }
+            }
+            else
+            {
+                settleBall(ballEntity);
+            }
         }
         else
         {
